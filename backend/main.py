@@ -1,7 +1,8 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(title="Student Rating System")
 
@@ -33,26 +34,13 @@ class RatingItem(BaseModel):
     group: str
     points: int
 
-@app.get("/rating", response_model=list[RatingItem])
+@app.get("/rating", response_model=list[Student])
 def get_rating(group: Optional[str] = None):
     filtered = students
     if group:
         filtered = [s for s in students if s.group == group]
 
-    sorted_students = sorted(filtered, key=lambda s: s.points, reverse=True)
-
-    rating = [
-        RatingItem(
-            rank=i + 1,
-            id=s.id,
-            name=s.name,
-            group=s.group,
-            points=s.points,
-        )
-        for i, s in enumerate(sorted_students)
-    ]
-
-    return rating
+    return sorted(filtered, key=lambda s: s.points, reverse=True)
 
 app.add_middleware(
     CORSMiddleware,
